@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepView - Mock Interview</title>
+    <link rel="stylesheet" href="css/interview_new.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="screen">
+            <div class="container">
+                <header class="header">
+                    <h1>Welcome to PrepView</h1>
+                    <p>Practice your interview skills with AI-powered mock interviews</p>
+                </header>
+
+                <div class="interview-options">
+                    <h2>Select Interview Type</h2>
+                    <div class="options-grid">
+                        <button class="option-card start-interview" data-type="technical">
+                            <i class="fas fa-code"></i>
+                            <h3>Technical Interview</h3>
+                            <p>Practice coding and technical questions</p>
+                        </button>
+
+                        <button class="option-card start-interview" data-type="behavioral">
+                            <i class="fas fa-comments"></i>
+                            <h3>Behavioral Interview</h3>
+                            <p>Practice behavioral and situational questions</p>
+                        </button>
+
+                        <button class="option-card start-interview" data-type="mixed">
+                            <i class="fas fa-random"></i>
+                            <h3>Mixed Interview</h3>
+                            <p>Combination of technical and behavioral questions</p>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interview Screen -->
+        <div id="interview-screen" class="screen hidden">
+            <div class="interview-container">
+                <header class="interview-header">
+                    <h2>Mock Interview</h2>
+                    <div class="interview-info">
+                        <span id="interview-type"></span>
+                        <button id="end-interview" class="btn btn-danger">End Interview</button>
+                    </div>
+                </header>
+
+                <div class="chat-container" id="chat-container">
+                    <!-- Messages will be added here dynamically -->
+                </div>
+
+                <div class="input-container">
+                    <div class="typing-indicator hidden" id="loading-indicator">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <textarea
+                        id="user-input"
+                        placeholder="Type your response here..."
+                        rows="1"
+                    ></textarea>
+                    <button id="send-button" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="results-screen" class="screen hidden">
+            <div class="container">
+                <header class="header">
+                    <h1>Interview Complete</h1>
+                    <p>Here's how you did</p>
+                </header>
+
+                <div class="results-container">
+                    <div class="score-card">
+                        <div class="score-circle">
+                            <span id="overall-score">0.0</span>
+                            <small>Overall Score</small>
+                        </div>
+                    </div>
+
+                    <div class="results-content">
+                        <div class="results-section">
+                            <h3>Feedback</h3>
+                            <div class="feedback-box" id="detailed-feedback">
+                                <!-- Feedback will be added here -->
+                            </div>
+                        </div>
+
+                        <div class="results-grid">
+                            <div class="results-column">
+                                <h4><i class="fas fa-check-circle"></i> Your Strengths</h4>
+                                <ul class="strengths-list" id="strengths-list">
+                                    <!-- Strengths will be added here -->
+                                </ul>
+                            </div>
+
+                            <div class="results-column">
+                                <h4><i class="fas fa-tools"></i> Areas for Improvement</h4>
+                                <ul class="improvements-list" id="improvements-list">
+                                    <!-- Improvements will be added here -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <button id="restart-interview" class="btn btn-primary">
+                                <i class="fas fa-redo"></i> Try Again
+                            </button>
+                            <button id="view-history" class="btn btn-secondary">
+                                <i class="fas fa-history"></i> View History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/interview_new.js"></script>
+</body>
+</html>

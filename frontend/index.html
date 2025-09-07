@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PrepView - AI-Powered Interview Preparation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/salary-calculator.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <div class="logo-hexagon">
+                    <svg viewBox="0 0 100 100" class="hexagon-svg">
+                        <polygon points="50,5 85,25 85,75 50,95 15,75 15,25" fill="url(#logoGradient)"/>
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00d4ff"/>
+                                <stop offset="100%" style="stop-color:#0066ff"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <i class="fas fa-brain"></i>
+                </div>
+                <span class="logo-text">PrepView</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#dashboard" class="nav-link hexagon-btn" data-route="dashboard">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#assessment" class="nav-link hexagon-btn" data-route="assessment">
+                        <i class="fas fa-hexagon"></i>
+                        Assessment
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#interview" class="nav-link hexagon-btn" data-route="interview">
+                        <i class="fas fa-microphone"></i>
+                        Mock Interview
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#salary" class="nav-link hexagon-btn" data-route="salary">
+                        <i class="fas fa-dollar-sign"></i>
+                        Salary Calculator
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#companies" class="nav-link hexagon-btn" data-route="companies">
+                        <i class="fas fa-building"></i>
+                        Companies
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#history" class="nav-link hexagon-btn" data-route="history">
+                        <i class="fas fa-history"></i>
+                        History
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Theme Toggle -->
+            <div class="theme-toggle">
+                <i class="fas fa-moon theme-toggle-icon active" id="dark-icon"></i>
+                <button class="theme-toggle-btn" id="theme-toggle" data-theme="dark">
+                    <span class="sr-only">Toggle theme</span>
+                </button>
+                <i class="fas fa-sun theme-toggle-icon" id="light-icon"></i>
+            </div>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Loading Screen -->
+        <div id="loading" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-hexagon">
+                    <svg viewBox="0 0 100 100" class="hexagon-svg">
+                        <polygon points="50,5 85,25 85,75 50,95 15,75 15,25" fill="url(#logoGradient)"/>
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#00d4ff"/>
+                                <stop offset="100%" style="stop-color:#0066ff"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h2>PrepView AI</h2>
+                <div id="loading-status" class="loading-status">Initializing application...</div>
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+
+        <!-- Interview Settings Modal -->
+        <div id="interview-settings" class="modal">
+            <h2>Select Interview Preferences</h2>
+            <form id="settings-form">
+                <label for="job-role">Job Role:</label>
+                <select id="job-role" name="job-role">
+                    <option value="Software Engineer">Software Engineer</option>
+                    <option value="Product Manager">Product Manager</option>
+                    <option value="Data Analyst">Data Analyst</option>
+                </select>
+                <br>
+                <label for="domain">Domain (optional):</label>
+                <select id="domain" name="domain">
+                    <option value="">--None--</option>
+                    <option value="frontend">Frontend</option>
+                    <option value="backend">Backend</option>
+                    <option value="ML">ML</option>
+                    <option value="system design">System Design</option>
+                </select>
+                <br>
+                <label>Interview Mode:</label>
+                <br>
+                <input type="radio" id="tech" name="mode" value="technical" checked>
+                <label for="tech">Technical</label>
+                <br>
+                <input type="radio" id="behavioral" name="mode" value="behavioral">
+                <label for="behavioral">Behavioral</label>
+                <br>
+                <button type="submit">Start Interview</button>
+            </form>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <div class="page-header">
+                <h1><i class="fas fa-chart-line"></i> AI Dashboard</h1>
+                <p>Your personalized interview preparation analytics</p>
+            </div>
+
+            <!-- Hero Hexagon Section -->
+            <div class="dashboard-hero hexagon-card">
+                <div class="hero-content">
+                    <div class="hero-hexagon">
+                        <h2>Your Abilities Hexagon</h2>
+                        <div class="dashboard-hexagon-chart" id="dashboard-hexagon-chart">
+                            <!-- Main hexagon chart will be rendered here -->
+                        </div>
+                        <div class="hexagon-stats-summary" id="hexagon-stats-summary">
+                            <!-- Quick stats will be rendered here -->
+                        </div>
+                    </div>
+                    <div class="hero-actions">
+                        <button class="hexagon-btn primary large" onclick="prepViewApp.navigateTo('assessment')">
+                            <i class="fas fa-hexagon"></i> View Detailed Assessment
+                        </button>
+                        <button class="hexagon-btn secondary" onclick="prepViewApp.startQuickInterview()">
+                            <i class="fas fa-play"></i> Quick Interview
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card hexagon-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="total-points">0</h3>
+                                <p>Total Points</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card hexagon-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="questions-answered">0</h3>
+                                <p>Questions Answered</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card hexagon-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="accuracy-rate">0%</h3>
+                                <p>Accuracy Rate</p>
+                            </div>
+                        </div>
+
+                        <div class="stat-card hexagon-card">
+                            <div class="stat-icon">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                            <div class="stat-info">
+                                <h3 id="user-rank">#0</h3>
+                                <p>Current Rank</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="achievement-preview-section">
+                    <div class="hexagon-card">
+                        <h3><i class="fas fa-trophy"></i> Recent Achievements</h3>
+                        <div class="achievement-preview" id="achievement-preview">
+                            <!-- Recent achievements will be rendered here -->
+                        </div>
+                        <button class="hexagon-btn secondary" onclick="prepViewApp.navigateTo('achievements')">
+                            <i class="fas fa-trophy"></i> View All Achievements
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-section hexagon-card">
+                <h2>Performance by Category</h2>
+                <div id="category-progress"></div>
+            </div>
+
+            <div class="recent-activity hexagon-card">
+                <h2>Recent Activity</h2>
+                <div id="recent-activity-list"></div>
+            </div>
+        </div>
+
+        <!-- Assessment Page -->
+        <div id="assessment" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-hexagon"></i> Blue Lock Assessment</h1>
+                <p>Your comprehensive skill evaluation radar</p>
+            </div>
+
+            <div class="assessment-container">
+                <div class="hexagon-chart-container">
+                    <div class="chart-header">
+                        <h2>Your Abilities Hexagon</h2>
+                        <div class="chart-controls">
+                            <button class="hexagon-btn secondary" id="compare-average">
+                                <i class="fas fa-users"></i> Compare with Average
+                            </button>
+                            <button class="hexagon-btn secondary" id="view-history">
+                                <i class="fas fa-history"></i> View History
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hexagon-chart" id="hexagon-chart">
+                        <!-- SVG hexagon chart will be rendered here -->
+                    </div>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-color current"></div>
+                            <span>Your Current Level</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color average"></div>
+                            <span>Platform Average</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="abilities-breakdown">
+                    <h3>Detailed Breakdown</h3>
+                    <div class="abilities-list" id="abilities-breakdown">
+                        <!-- Ability details will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-insights hexagon-card">
+                <h3><i class="fas fa-robot"></i> AI Insights</h3>
+                <div id="hexagon-ai-insights">
+                    <div class="insight-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Analyzing your performance patterns...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interview Page -->
+        <div id="interview" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-microphone"></i> AI-Enhanced Mock Interview</h1>
+                <p>Practice with real-time AI feedback and assessment</p>
+            </div>
+
+            <div id="interview-setup" class="interview-setup">
+                <div class="setup-card hexagon-card">
+                    <h2>Setup Your AI Interview</h2>
+                    <div class="setup-form">
+                        <div class="form-group">
+                            <label for="company-select">Target Company:</label>
+                            <select id="company-select" class="hexagon-input">
+                                <option value="">Select Company</option>
+                                <option value="Google">Google</option>
+                                <option value="Amazon">Amazon</option>
+                                <option value="Microsoft">Microsoft</option>
+                                <option value="Apple">Apple</option>
+                                <option value="Meta">Meta</option>
+                                <option value="Netflix">Netflix</option>
+                                <option value="Tesla">Tesla</option>
+                                <option value="Startup">Startup</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="role-select">Role Type:</label>
+                            <select id="role-select" class="hexagon-input">
+                                <option value="">Select Role</option>
+                                <option value="Software Engineer">Software Engineer</option>
+                                <option value="Data Scientist">Data Scientist</option>
+                                <option value="Product Manager">Product Manager</option>
+                                <option value="DevOps Engineer">DevOps Engineer</option>
+                                <option value="Frontend Developer">Frontend Developer</option>
+                                <option value="Backend Developer">Backend Developer</option>
+                                <option value="Full Stack Developer">Full Stack Developer</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="num-questions">Questions:</label>
+                                <select id="num-questions" class="hexagon-input">
+                                    <option value="5">5 Questions</option>
+                                    <option value="10" selected>10 Questions</option>
+                                    <option value="15">15 Questions</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="time-per-question">Time per Question:</label>
+                                <select id="time-per-question" class="hexagon-input">
+                                    <option value="60">1 minute</option>
+                                    <option value="120" selected>2 minutes</option>
+                                    <option value="180">3 minutes</option>
+                                    <option value="300">5 minutes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Voice Feature Toggle -->
+
+                    </div>
+
+                    <button id="start-interview" class="hexagon-btn primary large">
+                        <i class="fas fa-play"></i> Start AI Interview
+                    </button>
+                </div>
+            </div>
+
+            <div id="interview-session" class="interview-session hidden">
+                <div class="interview-header">
+                    <div class="question-counter">
+                        Question <span id="current-question">1</span> of <span id="total-questions">10</span>
+                    </div>
+                    <div class="timer hexagon-timer" id="timer">02:00</div>
+                    <div class="score">
+                        Score: <span id="current-score">0</span>
+                    </div>
+                </div>
+
+                <div class="question-card hexagon-card">
+                    <div class="question-meta">
+                        <span class="difficulty-badge" id="question-difficulty">Easy</span>
+                        <span class="category-tag" id="question-category">Technical</span>
+                        <span class="company-tag" id="question-company">Google</span>
+                    </div>
+                    <h3 id="interview-question">Question will appear here...</h3>
+                    <div class="question-details">
+                        <div class="expected-points">
+                            Expected Points: <span id="question-points">3</span>
+                        </div>
+                        <div class="hexagon-impact">
+                            <span>Hexagon Impact:</span>
+                            <div id="question-hexagon-impact"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="answer-section hexagon-card">
+                    <div class="answer-header">
+                        <h4>Your Answer</h4>
+                        <div class="ai-feedback-indicator" id="ai-feedback-indicator">
+                            <i class="fas fa-robot"></i>
+                            <span>AI analyzing...</span>
+                        </div>
+                    </div>
+                    <textarea id="answer-input" placeholder="Type your answer here... AI will provide real-time feedback."></textarea>
+
+                    <!-- Voice Controls -->
+                    <div class="voice-feature">
+                        <div class="voice-controls" id="voice-controls" style="display: none;">
+                            <div class="voice-buttons">
+                                <button id="start-recording" class="voice-btn record-btn">
+                                    <i class="fas fa-microphone"></i>
+                                    <span>Start Recording</span>
+                                </button>
+                                <button id="stop-recording" class="voice-btn stop-btn" style="display: none;">
+                                    <i class="fas fa-stop"></i>
+                                    <span>Stop Recording</span>
+                                </button>
+                                <button id="play-question" class="voice-btn play-btn">
+                                    <i class="fas fa-volume-up"></i>
+                                    <span>Read Question</span>
+                                </button>
+                            </div>
+                            <div class="voice-waveform" id="voice-waveform">
+                                <div class="waveform-bar"></div>
+                                <div class="waveform-bar"></div>
+                                <div class="waveform-bar"></div>
+                                <div class="waveform-bar"></div>
+                                <div class="waveform-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="real-time-feedback" id="real-time-feedback">
+                        <!-- Real-time AI feedback will appear here -->
+                    </div>
+                    <div class="answer-actions">
+                        <button id="skip-question" class="hexagon-btn secondary">
+                            <i class="fas fa-forward"></i> Skip
+                        </button>
+                        <button id="submit-answer" class="hexagon-btn primary">
+                            <i class="fas fa-check"></i> Submit Answer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="interview-results" class="interview-results hidden">
+                <div class="results-card hexagon-card">
+                    <div class="results-header">
+                        <h2><i class="fas fa-flag-checkered"></i> Interview Complete!</h2>
+                        <div class="final-score" id="final-score">0</div>
+                        <p>Total Points Earned</p>
+                    </div>
+
+                    <div class="results-grid">
+                        <div class="results-stats">
+                            <div class="result-stat">
+                                <span class="stat-label">Questions Answered:</span>
+                                <span class="stat-value" id="answered-count">0</span>
+                            </div>
+                            <div class="result-stat">
+                                <span class="stat-label">Average Score:</span>
+                                <span class="stat-value" id="avg-score">0/10</span>
+                            </div>
+                            <div class="result-stat">
+                                <span class="stat-label">AI Performance Rating:</span>
+                                <span class="stat-value" id="ai-performance-rating">Analyzing...</span>
+                            </div>
+                        </div>
+
+                        <div class="hexagon-updates">
+                            <h4>Hexagon Updates</h4>
+                            <div id="hexagon-changes"></div>
+                        </div>
+                    </div>
+
+                    <div class="ai-analysis hexagon-card">
+                        <h3><i class="fas fa-robot"></i> AI Analysis & Recommendations</h3>
+                        <div id="ai-interview-analysis">
+                            <div class="analysis-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Generating personalized insights...
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="results-actions">
+                        <button id="restart-interview" class="hexagon-btn secondary">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
+                        <button id="save-interview" class="hexagon-btn primary">
+                            <i class="fas fa-save"></i> Save to History
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Salary Calculator Page -->
+        <div id="salary" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-dollar-sign"></i> AI Salary Calculator</h1>
+                <p>Calculate your in-hand salary and deductions</p>
+            </div>
+
+            <div class="salary-container">
+                <div class="salary-form hexagon-card">
+                    <h2>Salary Details</h2>
+                    <form id="salary-form">
+                        <div class="form-group">
+                            <label for="base_salary">Annual Base Salary (₹)</label>
+                            <input type="number" id="base_salary" name="base_salary" required
+                                   placeholder="e.g., 1200000" min="0" step="1000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="country">Country</label>
+                            <select id="country" name="country" required>
+                                <option value="IN">India</option>
+                                <option value="US">United States</option>
+                                <option value="UK">United Kingdom</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="experience">Years of Experience</label>
+                            <input type="number" id="experience" name="experience"
+                                   min="0" max="50" value="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Bonuses (Yearly)</label>
+                            <div class="input-group">
+                                <input type="number" name="performance_bonus"
+                                       placeholder="Performance Bonus" min="0">
+                                <input type="number" name="joining_bonus"
+                                       placeholder="Joining Bonus" min="0">
+                                <input type="number" name="other_bonus"
+                                       placeholder="Other Bonuses" min="0">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Deductions (Yearly)</label>
+                            <div class="input-group">
+                                <input type="number" name="pf"
+                                       placeholder="PF" min="0">
+                                <input type="number" name="professional_tax"
+                                       placeholder="Professional Tax" min="0">
+                                <input type="number" name="insurance"
+                                       placeholder="Insurance" min="0">
+                                <input type="number" name="other_deductions"
+                                       placeholder="Other Deductions" min="0">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Calculate
+                        </button>
+                    </form>
+                </div>
+
+                <div class="salary-results hexagon-card" id="salary-results" style="display: none;">
+                    <h2>Salary Breakdown</h2>
+                    <div class="salary-summary">
+                        <div class="salary-amount" id="salary-amount">₹0</div>
+                        <div class="salary-period">Annual Gross Salary</div>
+                    </div>
+
+                    <div class="salary-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Monthly Take Home</div>
+                            <div class="stat-value" id="monthly-net">₹0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Yearly Take Home</div>
+                            <div class="stat-value" id="yearly-net">₹0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Total Tax</div>
+                            <div class="stat-value" id="tax-amount">₹0</div>
+                        </div>
+                    </div>
+
+                    <div class="salary-details">
+                        <h3>Salary Components</h3>
+                        <div class="breakdown" id="salary-breakdown">
+                            <!-- Filled by JavaScript -->
+                        </div>
+
+                        <h3>CTC Breakdown</h3>
+                        <div class="breakdown" id="ctc-breakdown">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div id="salary-loading" class="loading-overlay hidden">
+                    <div class="loading-spinner"></div>
+                    <p>Calculating your salary...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Companies Page -->
+        <div id="companies" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-building"></i> Company-Specific Prep</h1>
+                <p>Master interviews at top tech companies with targeted preparation</p>
+            </div>
+
+            <div class="companies-grid" id="companies-grid">
+                <!-- Company cards will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Company Detail Modal -->
+        <div id="company-modal" class="modal">
+            <div class="modal-content company-modal-content">
+                <div class="modal-header">
+                    <h2 id="company-modal-title">Company Details</h2>
+                    <button class="modal-close" id="company-modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="company-modal-body">
+                    <!-- Company details will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div id="history" class="page">
+            <div class="page-header">
+                <h1><i class="fas fa-history"></i> Interview History & Analytics</h1>
+                <p>Track your progress and review past performances</p>
+            </div>
+
+            <div class="history-controls">
+                <div class="filter-controls">
+                    <select id="history-filter" class="hexagon-input">
+                        <option value="all">All Interviews</option>
+                        <option value="last-week">Last Week</option>
+                        <option value="last-month">Last Month</option>
+                        <option value="last-3-months">Last 3 Months</option>
+                    </select>
+                    <button class="hexagon-btn secondary" id="export-history">
+                        <i class="fas fa-download"></i> Export History
+                    </button>
+                </div>
+            </div>
+
+            <div class="history-overview">
+                <div class="overview-stats">
+                    <div class="overview-card hexagon-card">
+                        <h3>Total Interviews</h3>
+                        <div class="overview-number" id="total-interviews">0</div>
+                    </div>
+                    <div class="overview-card hexagon-card">
+                        <h3>Average Score</h3>
+                        <div class="overview-number" id="average-score">0</div>
+                    </div>
+                    <div class="overview-card hexagon-card">
+                        <h3>Improvement Rate</h3>
+                        <div class="overview-number" id="improvement-rate">+0%</div>
+                    </div>
+                </div>
+
+                <div class="performance-chart hexagon-card">
+                    <h3>Performance Trend</h3>
+                    <div id="performance-chart">
+                        <!-- Performance trend chart will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-list hexagon-card">
+                <h3>Interview History</h3>
+                <div id="history-items">
+                    <!-- History items will be rendered here -->
+                </div>
+            </div>
+
+            <div class="ai-progress-insights hexagon-card">
+                <h3><i class="fas fa-robot"></i> AI Progress Analysis</h3>
+                <div id="ai-progress-insights">
+                    <div class="insight-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Analyzing your learning progression...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI Chatbot -->
+    <div class="chatbot-container" id="chatbot-container">
+        <div class="chatbot-header" id="chatbot-header">
+            <div class="chatbot-title">
+                <i class="fas fa-robot"></i>
+                <span>AI Interview Assistant</span>
+            </div>
+            <div class="chatbot-controls">
+                <button class="chatbot-minimize" id="chatbot-minimize">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <button class="chatbot-close" id="chatbot-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="chatbot-body" id="chatbot-body">
+            <div class="chat-messages" id="chat-messages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm your AI interview assistant. I can help you with interview preparation, answer questions about techniques, and provide personalized advice. How can I assist you today?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-prompts" id="quick-prompts">
+                <button class="prompt-btn" data-prompt="How do I answer behavioral questions effectively?">
+                    <i class="fas fa-user-tie"></i> Behavioral Questions
+                </button>
+                <button class="prompt-btn" data-prompt="Explain the STAR method for interview responses">
+                    <i class="fas fa-star"></i> STAR Method
+                </button>
+                <button class="prompt-btn" data-prompt="What are common algorithm interview patterns I should know?">
+                    <i class="fas fa-code"></i> Algorithm Patterns
+                </button>
+                <button class="prompt-btn" data-prompt="How can I improve my technical communication skills?">
+                    <i class="fas fa-comments"></i> Communication Tips
+                </button>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="typing-indicator" id="typing-indicator" style="display: none;">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                    <span>AI is typing...</span>
+                </div>
+                <div class="chat-input">
+                    <input type="text" id="chat-input" placeholder="Ask me anything about interviews...">
+                    <button id="send-message" class="send-btn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Username Modal -->
+    <div id="username-modal" class="modal">
+        <div class="modal-content hexagon-card">
+            <h2>Welcome to PrepView AI!</h2>
+            <p>Enter your username to begin your AI-powered interview preparation journey:</p>
+            <input type="text" id="username-input" class="hexagon-input" placeholder="Enter your username" maxlength="20">
+            <button id="save-username" class="hexagon-btn primary">
+                <i class="fas fa-user"></i> Start Journey
+            </button>
+        </div>
+    </div>
+
+    <script src="/js/salary-calculator.js"></script>
+    <script src="ai-integration.js"></script>
+    <script src="user-manager.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
