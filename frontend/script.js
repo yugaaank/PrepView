@@ -1,8 +1,7 @@
 // Enhanced PrepView Interview Preparation Application with AI Integration
 class PrepViewApp {
     constructor() {
-        // User management is now handled by UserManager
-        this.userManager = window.userManager || null;
+        this.currentUser = null;
         this.currentPage = 'dashboard';
         this.questions = [];
         this.interviewSession = null;
@@ -35,50 +34,35 @@ class PrepViewApp {
         console.log('Initializing PrepView app...');
 
         try {
-            // Show loading screen with status
-            this.updateLoadingStatus('Initializing application...');
-
-            // Check AI connection with timeout
-            this.updateLoadingStatus('Connecting to AI services...');
-            const aiConnected = await this.checkAIConnection().catch(error => {
-                console.warn('AI connection warning:', error);
-                return false;
-            });
-
-            // Continue with other initializations
-            this.updateLoadingStatus('Loading question data...');
+            console.log('Loading question data...');
             await this.loadEnhancedQuestionData();
+            console.log('Questions loaded:', this.questions.length);
 
-            this.updateLoadingStatus('Initializing theme...');
+            console.log('Initializing theme...');
             this.initializeTheme();
 
-            this.updateLoadingStatus('Initializing voice integration...');
+            console.log('Initializing voice integration...');
             this.initializeVoiceIntegration();
 
-            this.updateLoadingStatus('Setting up UI...');
+            console.log('Setting up event listeners...');
             this.setupEventListeners();
+
+            console.log('Initializing chatbot...');
             this.initializeChatbot();
+
+            console.log('Checking user status...');
             this.checkUserStatus();
+
+            console.log('Setting up router...');
             this.router();
 
-            // If we got here, initialization was successful
-            this.hideLoading();
+            console.log('Hiding loading screen...');
+            setTimeout(() => this.hideLoading(), 1500);
 
             console.log('PrepView app initialized successfully');
-
         } catch (error) {
             console.error('Error during initialization:', error);
-            this.hideLoading();
-            this.showError('Failed to initialize application. Please refresh the page to try again.');
         }
-    }
-
-    updateLoadingStatus(message) {
-        const statusElement = document.getElementById('loading-status');
-        if (statusElement) {
-            statusElement.textContent = message;
-        }
-        console.log(`Status: ${message}`);
     }
 
     // Fetch questions from backend API
@@ -349,40 +333,15 @@ class PrepViewApp {
     }
 
     applyTheme(theme) {
-        try {
-            document.documentElement.setAttribute('data-theme', theme);
-            this.currentTheme = theme;
-            localStorage.setItem('prepview_theme', theme);
-
-            // Update theme toggle button state
-            const themeToggle = document.getElementById('theme-toggle');
-            const darkIcon = document.getElementById('dark-icon');
-            const lightIcon = document.getElementById('light-icon');
-
-            if (themeToggle && darkIcon && lightIcon) {
-                themeToggle.setAttribute('data-theme', theme);
-                if (theme === 'dark') {
-                    darkIcon.classList.add('active');
-                    lightIcon.classList.remove('active');
-                } else {
-                    darkIcon.classList.remove('active');
-                    lightIcon.classList.add('active');
-                }
-            }
-        } catch (error) {
-            console.error('Error applying theme:', error);
-        }
+        document.documentElement.setAttribute('data-theme', theme);
+        this.currentTheme = theme;
+        localStorage.setItem('prepview_theme', theme);
     }
 
     toggleTheme() {
-        try {
-            const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-            this.applyTheme(newTheme);
-            this.updateThemeToggle();
-            console.log(`Theme toggled to: ${newTheme}`);
-        } catch (error) {
-            console.error('Error toggling theme:', error);
-        }
+        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
+        this.applyTheme(newTheme);
+        this.updateThemeToggle();
     }
 
     updateThemeToggle() {
@@ -436,75 +395,300 @@ class PrepViewApp {
         if (hamburger) {
             hamburger.addEventListener('click', () => {
                 hamburger.classList.toggle('active');
-                if (navMenu) {
-                    navMenu.classList.toggle('active');
+                navMenu.classList.toggle('active');
+            });
+        }
+
+        // Username modal
+        const saveUsernameBtn = document.getElementById('save-username');
+        const usernameInput = document.getElementById('username-input');
+
+        if (saveUsernameBtn) {
+            saveUsernameBtn.addEventListener('click', () => this.saveUsername());
+            usernameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.saveUsername();
+            });
+        }
+
+        // Interview page
+        this.setupInterviewListeners();
+
+        // Assessment page
+        this.setupAssessmentListeners();
+
+        // Salary calculator
+        this.setupSalaryListeners();
+
+        // History page
+        this.setupHistoryListeners();
+
+        // Companies page
+        this.setupCompanyListeners();
+    }
+
+    setupInterviewListeners() {
+        const startInterviewBtn = document.getElementById('start-interview');
+        const skipQuestionBtn = document.getElementById('skip-question');
+        const submitAnswerBtn = document.getElementById('submit-answer');
+        const restartInterviewBtn = document.getElementById('restart-interview');
+        const saveInterviewBtn = document.getElementById('save-interview');
+
+        if (startInterviewBtn) {
+            startInterviewBtn.addEventListener('click', () => this.startInterview());
+        }
+        if (skipQuestionBtn) {
+            skipQuestionBtn.addEventListener('click', () => this.skipQuestion());
+        }
+        if (submitAnswerBtn) {
+            submitAnswerBtn.addEventListener('click', () => this.submitAnswer());
+        }
+        if (restartInterviewBtn) {
+            restartInterviewBtn.addEventListener('click', () => this.resetInterview());
+        }
+        if (saveInterviewBtn) {
+            saveInterviewBtn.addEventListener('click', () => this.saveInterviewToHistory());
+        }
+
+        // Real-time answer feedback
+        const answerInput = document.getElementById('answer-input');
+        if (answerInput) {
+            let feedbackTimeout;
+            answerInput.addEventListener('input', () => {
+                clearTimeout(feedbackTimeout);
+                feedbackTimeout = setTimeout(() => {
+                    this.provideRealTimeFeedback(answerInput.value);
+                }, 1000);
+            });
+        }
+
+        // Voice mode toggle
+        const voiceToggle = document.getElementById('enable-voice-mode');
+        if (voiceToggle) {
+            voiceToggle.addEventListener('change', (e) => {
+                this.toggleVoiceMode(e.target.checked);
+            });
+        }
+
+        // Voice controls
+        this.setupVoiceControls();
+    }
+
+    setupAssessmentListeners() {
+        const compareAverageBtn = document.getElementById('compare-average');
+        const viewHistoryBtn = document.getElementById('view-history');
+
+        if (compareAverageBtn) {
+            compareAverageBtn.addEventListener('click', () => this.toggleAverageComparison());
+        }
+        if (viewHistoryBtn) {
+            viewHistoryBtn.addEventListener('click', () => this.showHexagonHistory());
+        }
+    }
+
+    setupSalaryListeners() {
+        const salaryForm = document.getElementById('salary-form');
+        const exportReportBtn = document.getElementById('export-report');
+        const saveCalculationBtn = document.getElementById('save-calculation');
+
+        if (salaryForm) {
+            salaryForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.calculateSalary();
+            });
+        }
+        if (exportReportBtn) {
+            exportReportBtn.addEventListener('click', () => this.exportSalaryReport());
+        }
+        if (saveCalculationBtn) {
+            saveCalculationBtn.addEventListener('click', () => this.saveSalaryCalculation());
+        }
+
+        // Generate skills checkboxes
+        this.generateSkillsGrid();
+    }
+
+    setupHistoryListeners() {
+        const historyFilter = document.getElementById('history-filter');
+        const exportHistoryBtn = document.getElementById('export-history');
+
+        if (historyFilter) {
+            historyFilter.addEventListener('change', () => this.filterHistory());
+        }
+        if (exportHistoryBtn) {
+            exportHistoryBtn.addEventListener('click', () => this.exportHistory());
+        }
+    }
+
+    setupCompanyListeners() {
+        // Company modal close
+        const companyModalClose = document.getElementById('company-modal-close');
+        const companyModal = document.getElementById('company-modal');
+
+        if (companyModalClose) {
+            companyModalClose.addEventListener('click', () => this.closeCompanyModal());
+        }
+
+        if (companyModal) {
+            companyModal.addEventListener('click', (e) => {
+                if (e.target === companyModal) {
+                    this.closeCompanyModal();
                 }
             });
         }
     }
 
-    checkUserStatus() {
-        try {
-            const savedUser = localStorage.getItem('prepview_user');
-            if (savedUser) {
-                this.currentUser = JSON.parse(savedUser);
-            } else {
-                this.currentUser = this.createDefaultUser();
-                localStorage.setItem('prepview_user', JSON.stringify(this.currentUser));
+    // Chatbot Initialization
+    initializeChatbot() {
+        console.log('Initializing chatbot...');
+
+        const chatFab = document.getElementById('chat-fab');
+        const chatbotContainer = document.getElementById('chatbot-container');
+        const chatbotClose = document.getElementById('chatbot-close');
+        const chatbotMinimize = document.getElementById('chatbot-minimize');
+        const sendMessageBtn = document.getElementById('send-message');
+        const chatInput = document.getElementById('chat-input');
+
+        console.log('Chatbot elements found:', {
+            chatFab: !!chatFab,
+            chatbotContainer: !!chatbotContainer,
+            chatbotClose: !!chatbotClose,
+            chatbotMinimize: !!chatbotMinimize,
+            sendMessageBtn: !!sendMessageBtn,
+            chatInput: !!chatInput
+        });
+
+        // Add direct event listener to the chat button with better error handling
+        if (chatFab) {
+            // Remove any existing click listeners to prevent duplicates
+            const newChatFab = chatFab.cloneNode(true);
+            chatFab.parentNode.replaceChild(newChatFab, chatFab);
+            
+            newChatFab.addEventListener('click', (e) => {
+                console.log('Chat button clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                this.toggleChatbot();
+            });
+        } else {
+            console.error('Chat FAB not found in the DOM');
+        }
+
+        // Other event listeners with better error handling
+        if (chatbotClose) {
+            chatbotClose.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeChatbot();
+            });
+        }
+
+        if (chatbotMinimize) {
+            chatbotMinimize.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.minimizeChatbot();
+            });
+        }
+
+        if (sendMessageBtn) {
+            sendMessageBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.sendChatMessage();
+            });
+        }
+
+        if (chatInput) {
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.sendChatMessage();
+                }
+            });
+        }
+
+        // Quick prompt buttons
+        document.addEventListener('click', (e) => {
+            if (e.target.matches('.prompt-btn')) {
+                const prompt = e.target.getAttribute('data-prompt');
+                this.sendChatMessage(prompt);
             }
-            this.updateUserUI();
-        } catch (error) {
-            console.error('Error in checkUserStatus:', error);
-            this.currentUser = this.createDefaultUser();
-            this.updateUserUI();
+        });
+
+        // Load chat history
+        this.loadChatHistory();
+    }
+
+    // User Management
+    checkUserStatus() {
+        const storedUser = localStorage.getItem('prepview_user');
+        if (storedUser) {
+            this.currentUser = JSON.parse(storedUser);
+            this.initializeUserHexagon();
+        } else {
+            this.showUsernameModal();
         }
     }
 
-    createDefaultUser() {
-        return {
-            username: 'testuser',
-            email: 'test@example.com',
-            hexagonStats: {
-                communication: 50,
-                problem_solving: 60,
-                technical_expertise: 70,
-                adaptability: 55,
-                critical_thinking: 65,
-                confidence: 50
-            },
-            interviewHistory: [],
+    showUsernameModal() {
+        const modal = document.getElementById('username-modal');
+        if (modal) {
+            modal.classList.add('show');
+            document.getElementById('username-input').focus();
+        }
+    }
+
+    saveUsername() {
+        const usernameInput = document.getElementById('username-input');
+        const username = usernameInput.value.trim();
+
+        if (username.length < 2) {
+            alert('Username must be at least 2 characters long');
+            return;
+        }
+
+        this.currentUser = {
+            username: username,
             totalPoints: 0,
             questionsAnswered: 0,
             correctAnswers: 0,
             categoryStats: {},
-            joinDate: new Date().toISOString(),
-            createdAt: new Date().toISOString()
+            hexagonStats: this.initializeHexagonStats(),
+            interviewHistory: [],
+            salaryCalculations: [],
+            joinDate: new Date().toISOString()
         };
-    }
 
-    updateUserUI() {
-        if (!this.currentUser) {
-            console.error('No user data available');
-            this.currentUser = this.createDefaultUser();
-            localStorage.setItem('prepview_user', JSON.stringify(this.currentUser));
-            const modal = document.getElementById('username-modal');
-            if (modal) {
-                modal.classList.remove('show');
-            }
-            this.updateDashboard();
-            if (document.getElementById('hexagon-chart')) {
-                this.renderHexagonChart();
-            }
-            this.navigateTo('dashboard');
-        }
+        localStorage.setItem('prepview_user', JSON.stringify(this.currentUser));
+        document.getElementById('username-modal').classList.remove('show');
+        this.updateDashboard();
+        this.renderHexagonChart();
     }
 
     initializeHexagonStats() {
         const stats = {};
         this.hexagonAbilities.forEach(ability => {
-            stats[ability] = Math.floor(Math.random() * 30) + 20;
+            stats[ability] = Math.floor(Math.random() * 30) + 20; // Start with 20-50 range
         });
         return stats;
+    }
+
+    initializeUserHexagon() {
+        if (!this.currentUser.hexagonStats) {
+            this.currentUser.hexagonStats = this.initializeHexagonStats();
+            this.saveUserData();
+        }
+    }
+
+    saveUserData() {
+        if (this.currentUser) {
+            localStorage.setItem('prepview_user', JSON.stringify(this.currentUser));
+        }
+    }
+
+    // Routing
+    router() {
+        const hash = window.location.hash.substring(1) || 'dashboard';
+        this.navigateTo(hash);
     }
 
     navigateTo(page) {
@@ -618,7 +802,7 @@ class PrepViewApp {
         container.innerHTML = categories.map(category => {
             const stats = categoryStats[category] || { answered: 0, total: 0, points: 0 };
             const totalQuestions = this.questions.filter(q => q.category === category).length;
-            const progress = totalQuestions > 0 ? (stats.answered / totalQuestions) * 10 : 0;
+            const progress = totalQuestions > 0 ? (stats.answered / totalQuestions) * 100 : 0;
 
             return `
                 <div class="progress-item">
@@ -629,10 +813,10 @@ class PrepViewApp {
                         </div>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progress * 10}%"></div>
+                        <div class="progress-fill" style="width: ${progress}%"></div>
                     </div>
                     <div style="min-width: 60px; text-align: right; color: var(--text-accent); font-weight: 600;">
-                        ${(stats.points || 0).toFixed(1)}/10
+                        ${stats.points || 0} pts
                     </div>
                 </div>
             `;
@@ -1161,7 +1345,7 @@ class PrepViewApp {
                     </div>
                 </div>
                 <div style="color: var(--text-accent); font-weight: 600;">
-                    ${(interview.totalScore / 10).toFixed(1)}/10
+                    ${interview.totalScore} pts
                 </div>
             </div>
         `).join('');
@@ -1171,44 +1355,49 @@ class PrepViewApp {
     renderHexagonChart() {
         const container = document.getElementById('hexagon-chart');
         if (!container) {
-            console.warn('Hexagon chart container not found');
+            console.error('Hexagon chart container not found');
+            return;
+        }
+        if (!this.currentUser) {
+            console.error('No current user found, showing username modal');
+            this.showUsernameModal();
             return;
         }
 
-        if (!this.currentUser || !this.currentUser.hexagonStats) {
-            console.warn('No user data available for hexagon chart');
+        const stats = this.currentUser.hexagonStats;
+        if (!stats) {
+            console.error('No hexagon stats found for user');
+            this.initializeUserHexagon();
             return;
         }
+        const abilities = this.hexagonAbilities;
 
-        try {
-            // Existing hexagon chart rendering code
-            const stats = this.currentUser.hexagonStats;
-            const abilities = this.hexagonAbilities;
+        // Create SVG hexagon chart
+        const svg = this.createHexagonSVG(stats, abilities);
+        container.innerHTML = svg;
 
-            container.innerHTML = '';
-            container.appendChild(this.createHexagonSVG(stats, abilities));
-
-            // Add ability tooltips and interactions
-            this.addHexagonClickHandlers();
-        } catch (error) {
-            console.error('Error rendering hexagon chart:', error);
-        }
+        // Render abilities breakdown
+        this.renderAbilitiesBreakdown();
     }
 
     createHexagonSVG(stats, abilities) {
         const size = 300;
         const center = size / 2;
-        const radius = 120; // Increased radius for better visualization
+        const radius = 100;
 
         // Calculate points for hexagon
         const points = abilities.map((ability, index) => {
             const angle = (index * 60 - 90) * (Math.PI / 180);
-            const value = Math.min(10, Math.max(0, (stats[ability] || 0))); // Ensure value is between 0-10
-            const distance = (value / 10) * radius; // Scale to 0-10
+            const value = stats[ability] || 0;
+            const distance = (value / 100) * radius;
 
             return {
                 x: center + Math.cos(angle) * distance,
-                y: center + Math.sin(angle) * distance
+                y: center + Math.sin(angle) * distance,
+                labelX: center + Math.cos(angle) * (radius + 30),
+                labelY: center + Math.sin(angle) * (radius + 30),
+                ability: ability.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                value: value
             };
         });
 
@@ -1267,6 +1456,12 @@ class PrepViewApp {
 
                 ${points.map(point => `
                     <circle cx="${point.x}" cy="${point.y}" r="4" fill="#00d4ff" stroke="white" stroke-width="2"/>
+                    <text x="${point.labelX}" y="${point.labelY}" text-anchor="middle" fill="var(--text-primary)" font-size="12" font-weight="600">
+                        ${point.ability}
+                    </text>
+                    <text x="${point.labelX}" y="${point.labelY + 15}" text-anchor="middle" fill="var(--text-accent)" font-size="10" font-weight="700">
+                        ${point.value}
+                    </text>
                 `).join('')}
             </svg>
         `;
@@ -1295,7 +1490,7 @@ class PrepViewApp {
                 <div class="ability-item">
                     <div class="ability-header">
                         <span class="ability-name">${name}</span>
-                        <span class="ability-score">${(score / 10).toFixed(1)}/10</span>
+                        <span class="ability-score">${score}/100</span>
                     </div>
                     <div class="ability-description">${description}</div>
                 </div>
@@ -1313,6 +1508,7 @@ class PrepViewApp {
             container.innerHTML = `
                 <div class="ai-insight-content">
                     <div class="insight-summary">
+                        <h4>Assessment Summary</h4>
                         <p>${insights.summary}</p>
                     </div>
 
@@ -1415,7 +1611,7 @@ class PrepViewApp {
             currentIndex: 0,
             timePerQuestion: timePerQuestion,
             timeRemaining: timePerQuestion,
-            score: 0,  // Initialize score to 0
+            score: 0,
             answers: [],
             startTime: new Date(),
             hexagonUpdates: {}
@@ -1436,7 +1632,7 @@ class PrepViewApp {
 
         document.getElementById('current-question').textContent = session.currentIndex + 1;
         document.getElementById('total-questions').textContent = session.questions.length;
-        document.getElementById('current-score').textContent = (session.score / 10).toFixed(1);
+        document.getElementById('current-score').textContent = session.score;
         document.getElementById('question-difficulty').textContent = question.difficulty;
         document.getElementById('question-difficulty').className = `difficulty-badge ${question.difficulty}`;
         document.getElementById('question-category').textContent = question.category;
@@ -1506,8 +1702,7 @@ class PrepViewApp {
         }
 
         try {
-            const currentQuestion = this.interviewSession?.questions[this.interviewSession.currentIndex]?.question || 'General interview question';
-            const feedback = await this.aiIntegration.getRealTimeFeedback(answer, currentQuestion);
+            const feedback = await this.aiIntegration.getRealTimeFeedback(answer);
             feedbackContainer.innerHTML = `
                 <div class="feedback-item">
                     <i class="fas fa-robot"></i>
@@ -1668,21 +1863,12 @@ class PrepViewApp {
         if (!this.interviewSession) return;
 
         const session = this.interviewSession;
-        const answeredCount = session.answers.filter(a => a.answer && a.answer.length > 0).length;
-        const totalQuestions = session.questions.length;
+        const answeredCount = session.answers.filter(a => a.answer.length > 0).length;
+        const avgScore = session.answers.reduce((sum, a) => sum + a.assessment.score, 0) / session.answers.length;
 
-        // Calculate average score from answered questions only
-        const answeredScores = session.answers
-            .filter(a => a.answer && a.answer.length > 0)
-            .map(a => a.assessment?.score || 0);
-
-        const avgScore = answeredScores.length > 0
-            ? (answeredScores.reduce((sum, score) => sum + score, 0) / answeredScores.length)
-            : 0;
-
-        document.getElementById('final-score').textContent = session.score.toFixed(1);
-        document.getElementById('answered-count').textContent = `${answeredCount}/${totalQuestions}`;
-        document.getElementById('avg-score').textContent = `${avgScore.toFixed(2)}%`;
+        document.getElementById('final-score').textContent = session.score;
+        document.getElementById('answered-count').textContent = `${answeredCount}/${session.questions.length}`;
+        document.getElementById('avg-score').textContent = `${avgScore.toFixed(1)}/10`;
 
         // Show hexagon updates
         const hexagonChanges = document.getElementById('hexagon-changes');
@@ -1712,9 +1898,7 @@ class PrepViewApp {
         try {
             // Simulate AI analysis based on interview performance
             const session = this.interviewSession;
-            const avgScore = session.answers.length > 0
-                ? session.answers.reduce((sum, a) => sum + a.assessment.score, 0) / session.answers.length
-                : 0;
+            const avgScore = session.answers.reduce((sum, a) => sum + a.assessment.score, 0) / session.answers.length;
 
             let analysis = "";
             let recommendations = [];
@@ -1754,14 +1938,12 @@ class PrepViewApp {
                         <p>${analysis}</p>
                     </div>
 
-                    ${recommendations.length > 0 ? `
-                        <div class="analysis-section">
-                            <h4><i class="fas fa-lightbulb"></i> Personalized Recommendations</h4>
-                            <ul>
-                                ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
+                    <div class="analysis-recommendations">
+                        <h4><i class="fas fa-lightbulb"></i> Personalized Recommendations</h4>
+                        <ul>
+                            ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
 
                     <div class="analysis-next-steps">
                         <h4><i class="fas fa-arrow-right"></i> Next Steps</h4>
@@ -1790,9 +1972,7 @@ class PrepViewApp {
             role: this.interviewSession.role,
             totalScore: this.interviewSession.score,
             questionsAnswered: this.interviewSession.answers.length,
-            avgScore: this.interviewSession.answers.length > 0
-                ? this.interviewSession.answers.reduce((sum, a) => sum + a.assessment.score, 0) / this.interviewSession.answers.length
-                : 0,
+            avgScore: this.interviewSession.answers.reduce((sum, a) => sum + a.assessment.score, 0) / this.interviewSession.answers.length,
             hexagonUpdates: this.interviewSession.hexagonUpdates,
             answers: this.interviewSession.answers
         };
@@ -1917,35 +2097,27 @@ class PrepViewApp {
         if (!container) return;
 
         // Simple bar chart representation
-        const max = Math.max(...[salaryData.range.min, salaryData.range.max, salaryData.marketComparison.percentile75]);
-        const chartHeight = 150;
+        const { range, median, marketComparison } = salaryData;
+        const max = Math.max(range.max, marketComparison.percentile75);
 
         container.innerHTML = `
-            <div class="chart-container" style="height: ${chartHeight}px; position: relative; background: var(--bg-tertiary); border-radius: var(--radius); padding: 1rem;">
-                <svg width="100%" height="100%" viewBox="0 0 400 ${chartHeight}">
-                    <defs>
-                        <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:rgba(0, 212, 255, 0.3)"/>
-                            <stop offset="100%" style="stop-color:rgba(0, 102, 255, 0.3)"/>
-                        </linearGradient>
-                    </defs>
-
-                    ${salaryData.range.min > 0 ? `
-                        <rect x="10" y="${chartHeight - 20 - ((salaryData.range.min / max) * (chartHeight - 40))}" width="40" height="${(salaryData.range.min / max) * (chartHeight - 40)}" fill="#00d4ff" rx="2" />
-                    ` : ''}
-                    ${salaryData.range.max > 0 ? `
-                        <rect x="70" y="${chartHeight - 20 - ((salaryData.range.max / max) * (chartHeight - 40))}" width="40" height="${(salaryData.range.max / max) * (chartHeight - 40)}" fill="#00d4ff" rx="2" />
-                    ` : ''}
-                    ${salaryData.marketComparison.average > 0 ? `
-                        <rect x="130" y="${chartHeight - 20 - ((salaryData.marketComparison.average / max) * (chartHeight - 40))}" width="40" height="${(salaryData.marketComparison.average / max) * (chartHeight - 40)}" fill="rgba(255, 255, 255, 0.3)" rx="2" />
-                    ` : ''}
-                    ${salaryData.marketComparison.percentile25 > 0 ? `
-                        <rect x="190" y="${chartHeight - 20 - ((salaryData.marketComparison.percentile25 / max) * (chartHeight - 40))}" width="40" height="${(salaryData.marketComparison.percentile25 / max) * (chartHeight - 40)}" fill="rgba(255, 255, 255, 0.3)" rx="2" />
-                    ` : ''}
-                    ${salaryData.marketComparison.percentile75 > 0 ? `
-                        <rect x="250" y="${chartHeight - 20 - ((salaryData.marketComparison.percentile75 / max) * (chartHeight - 40))}" width="40" height="${(salaryData.marketComparison.percentile75 / max) * (chartHeight - 40)}" fill="rgba(255, 255, 255, 0.3)" rx="2" />
-                    ` : ''}
-                </svg>
+            <div class="salary-bars" style="display: flex; align-items: end; height: 150px; gap: 1rem; padding: 1rem;">
+                <div class="salary-bar" style="flex: 1; text-align: center;">
+                    <div style="background: var(--gradient-primary); height: ${(range.min / max) * 100}px; border-radius: var(--radius); margin-bottom: 0.5rem;"></div>
+                    <small>Your Min</small>
+                </div>
+                <div class="salary-bar" style="flex: 1; text-align: center;">
+                    <div style="background: var(--gradient-primary); height: ${(median / max) * 100}px; border-radius: var(--radius); margin-bottom: 0.5rem;"></div>
+                    <small>Your Median</small>
+                </div>
+                <div class="salary-bar" style="flex: 1; text-align: center;">
+                    <div style="background: var(--gradient-primary); height: ${(range.max / max) * 100}px; border-radius: var(--radius); margin-bottom: 0.5rem;"></div>
+                    <small>Your Max</small>
+                </div>
+                <div class="salary-bar" style="flex: 1; text-align: center;">
+                    <div style="background: rgba(255, 255, 255, 0.3); height: ${(marketComparison.average / max) * 100}px; border-radius: var(--radius); margin-bottom: 0.5rem;"></div>
+                    <small>Market Avg</small>
+                </div>
             </div>
         `;
     }
@@ -2011,13 +2183,13 @@ class PrepViewApp {
 
         // Update overview stats
         document.getElementById('total-interviews').textContent = history.length;
-        const avgScore = history.reduce((sum, interview) => sum + (interview.avgScore / 10), 0) / history.length;
-        document.getElementById('average-score').textContent = `${avgScore.toFixed(1)}/10`;
+        const avgScore = history.reduce((sum, interview) => sum + interview.avgScore, 0) / history.length;
+        document.getElementById('average-score').textContent = avgScore.toFixed(1);
 
         // Calculate improvement rate
         if (history.length > 1) {
-            const recentAvg = history.slice(-3).reduce((sum, interview) => sum + (interview.avgScore / 10), 0) / Math.min(3, history.length);
-            const earlierAvg = history.slice(0, -3).reduce((sum, interview) => sum + (interview.avgScore / 10), 0) / Math.max(1, history.length - 3);
+            const recentAvg = history.slice(-3).reduce((sum, interview) => sum + interview.avgScore, 0) / Math.min(3, history.length);
+            const earlierAvg = history.slice(0, -3).reduce((sum, interview) => sum + interview.avgScore, 0) / Math.max(1, history.length - 3);
             const improvement = ((recentAvg - earlierAvg) / earlierAvg) * 100;
             document.getElementById('improvement-rate').textContent = `${improvement > 0 ? '+' : ''}${improvement.toFixed(1)}%`;
         }
@@ -2033,12 +2205,12 @@ class PrepViewApp {
                         </span>
                     </div>
                     <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                        ${interview.questionsAnswered} questions • Avg: ${(interview.avgScore / 10).toFixed(1)}/10
+                        ${interview.questionsAnswered} questions • Avg: ${interview.avgScore.toFixed(1)}/10
                     </div>
                 </div>
                 <div style="text-align: right;">
                     <div style="color: var(--text-accent); font-weight: 700; font-size: 1.2rem;">
-                        ${(interview.totalScore / 10).toFixed(1)}/10
+                        ${interview.totalScore} pts
                     </div>
                     <button class="hexagon-btn secondary" style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.8rem;" onclick="prepViewApp.viewInterviewDetails(${interview.id})">
                         <i class="fas fa-eye"></i> Details
@@ -2056,7 +2228,7 @@ class PrepViewApp {
         if (!container || history.length === 0) return;
 
         // Simple line chart representation
-        const maxScore = Math.max(...history.map(h => h.avgScore / 10));
+        const maxScore = Math.max(...history.map(h => h.avgScore));
         const chartHeight = 150;
 
         container.innerHTML = `
@@ -2065,17 +2237,17 @@ class PrepViewApp {
                     <defs>
                         <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
                             <stop offset="0%" style="stop-color:rgba(0, 212, 255, 0.3)"/>
-                            <stop offset="100%" style="stop-color:rgba(0, 102, 255, 0.3)"/>
+                            <stop offset="100%" style="stop-color:rgba(0, 212, 255, 0.1)"/>
                         </linearGradient>
                     </defs>
                     ${history.map((interview, index) => {
                         const x = (index / (history.length - 1)) * 380 + 10;
-                        const y = chartHeight - 20 - ((interview.avgScore / 10 / maxScore) * (chartHeight - 40));
+                        const y = chartHeight - 20 - ((interview.avgScore / 10) * (chartHeight - 40));
                         return `<circle cx="${x}" cy="${y}" r="4" fill="#00d4ff" stroke="white" stroke-width="2"/>`;
                     }).join('')}
                     <polyline points="${history.map((interview, index) => {
                         const x = (index / (history.length - 1)) * 380 + 10;
-                        const y = chartHeight - 20 - ((interview.avgScore / 10 / maxScore) * (chartHeight - 40));
+                        const y = chartHeight - 20 - ((interview.avgScore / 10) * (chartHeight - 40));
                         return `${x},${y}`;
                     }).join(' ')}" fill="none" stroke="#00d4ff" stroke-width="2"/>
                 </svg>
@@ -2131,7 +2303,7 @@ class PrepViewApp {
         if (!interview) return;
 
         // Create detailed view modal or navigate to detailed page
-        alert(`Interview Details:\nCompany: ${interview.company}\nRole: ${interview.role}\nScore: ${(interview.totalScore / 10).toFixed(1)}/10\nDate: ${new Date(interview.date).toLocaleDateString()}`);
+        alert(`Interview Details:\nCompany: ${interview.company}\nRole: ${interview.role}\nScore: ${interview.totalScore}\nDate: ${new Date(interview.date).toLocaleDateString()}`);
     }
 
     filterHistory() {
@@ -2171,11 +2343,11 @@ class PrepViewApp {
 
         // Toggle the 'open' class
         container.classList.toggle('open');
-
+        
         // Log the current state for debugging
         const isOpen = container.classList.contains('open');
         console.log(`Chatbot is now ${isOpen ? 'open' : 'closed'}`);
-
+        
         // Focus the input when opening
         if (isOpen && chatInput) {
             setTimeout(() => {
@@ -2290,3 +2462,20 @@ document.addEventListener('DOMContentLoaded', () => {
         window.prepViewApp.router();
     });
 });
+async function startInterview(domain) {
+  const res = await fetch("/start_interview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ domain })
+  });
+  return await res.json();
+}
+
+async function submitAnswer(answer) {
+  const res = await fetch("/submit_answer", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ answer })
+  });
+  return await res.json();
+}
